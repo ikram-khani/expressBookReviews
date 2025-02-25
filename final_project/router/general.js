@@ -4,6 +4,29 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+const axios = require('axios');
+
+
+const getBooksAsync = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/');
+    console.log(response.data); // Logs the books to the console
+  } catch (error) {
+    console.error("Error fetching books:", error.message);
+  }
+};
+
+getBooksAsync();
+
+// Get the book list available in the shop
+public_users.get('/', async (req, res) => {
+  try {
+    return res.status(200).json(books); // Directly returning books (no infinite loop)
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching books", error: error.message });
+  }
+});
+
 
 public_users.post("/register", (req, res) => {
   const { username, password } = req.body;
@@ -21,14 +44,6 @@ public_users.post("/register", (req, res) => {
   users.push({ username, password });
 
   return res.status(201).json({ message: "User registered successfully" });
-});
-
-
-
-
-// Get the book list available in the shop
-public_users.get('/', function (req, res) {
-  return res.status(200).json({ books: JSON.stringify(books, null, 2) });
 });
 
 
