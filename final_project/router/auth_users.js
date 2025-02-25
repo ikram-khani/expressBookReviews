@@ -38,9 +38,30 @@ regd_users.post("/login", (req, res) => {
   return res.status(200).json({ message: "Login successful", token });
 });
 
-// Add a book review
+// Add or modify a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  return res.status(300).json({ message: "Yet to be implemented" });
+  const { isbn } = req.params;
+  const { review } = req.query;
+
+  if (!req.session || !req.session.token) {
+    return res.status(401).json({ message: "Unauthorized: Please log in" });
+  }
+
+  const decoded = jwt.verify(req.session.token, "fingerprint_customer");
+  const username = decoded.username;
+
+  if (!books[isbn]) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  if (!books[isbn].reviews) {
+    books[isbn].reviews = {};
+  }
+
+  // Add or update the review
+  books[isbn].reviews[username] = review;
+
+  return res.status(200).json({ message: "Review added/updated successfully", reviews: books[isbn].reviews });
 });
 
 module.exports.authenticated = regd_users;
