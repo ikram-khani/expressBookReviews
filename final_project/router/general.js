@@ -46,15 +46,29 @@ public_users.post("/register", (req, res) => {
   return res.status(201).json({ message: "User registered successfully" });
 });
 
+//get books by isbn directly through axios
+const getBookByISBN = async (isbn) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/isbn/${isbn}`);
+    console.log(response.data); // Logs the book details
+  } catch (error) {
+    console.error("Error fetching book:", error.message);
+  }
+};
+
+getBookByISBN("9"); // Replace with a valid ISBN
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn', function (req, res) {
-  const isbn = req.params.isbn; // Extract ISBN from request parameters
-  
-  if (books[isbn]) {
-    return res.status(200).json(books[isbn]); // Return book details
-  } else {
-    return res.status(404).json({ message: "Book not found" }); // If ISBN does not exist
+public_users.get('/isbn/:isbn', async (req, res) => {
+  try {
+    const isbn = req.params.isbn; 
+    if (books[isbn]) {
+      return res.status(200).json(books[isbn]); // Return book details
+    } else {
+      return res.status(404).json({ message: "Book not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching book details", error: error.message });
   }
 });
 
